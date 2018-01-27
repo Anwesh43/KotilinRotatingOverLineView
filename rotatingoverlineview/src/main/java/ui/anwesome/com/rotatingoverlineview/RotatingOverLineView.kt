@@ -77,4 +77,16 @@ class RotatingOverLineView(ctx:Context):View(ctx) {
             }
         }
     }
+    data class RotatingOverLineContainerState(var n:Int, var j:Int = 0,var dir:Int = 1) {
+        fun incrementCounter() {
+            j += dir
+            if(j == n || j == -1) {
+                dir *= -1
+                j += dir
+            }
+        }
+        fun executeCb(cb:(Int)->Unit) {
+            cb(j)
+        }
+    }
 }
