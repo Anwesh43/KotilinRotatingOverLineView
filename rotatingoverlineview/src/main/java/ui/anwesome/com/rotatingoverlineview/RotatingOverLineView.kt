@@ -3,6 +3,7 @@ package ui.anwesome.com.rotatingoverlineview
 /**
  * Created by anweshmishra on 28/01/18.
  */
+import android.app.Activity
 import android.view.*
 import android.graphics.*
 import android.content.*
@@ -147,6 +148,13 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
             container?.startUpdating {
                 animator.stop()
             }
+        }
+    }
+    companion object {
+        fun create(activity:Activity):RotatingOverLineView {
+            val view = RotatingOverLineView(activity)
+            activity.setContentView(view)
+            return view
         }
     }
 }
