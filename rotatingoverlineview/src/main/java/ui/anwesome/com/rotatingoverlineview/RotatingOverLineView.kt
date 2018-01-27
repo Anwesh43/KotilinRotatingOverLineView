@@ -122,6 +122,33 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
             }
         }
     }
+    data class Renderer(var view:RotatingOverLineView,var time:Int = 0) {
+        var container:RotatingOverLineContainer?=null
+        val animator = Animator(view)
+        fun render(canvas:Canvas,paint:Paint) {
+            if(time == 0) {
+                val w = canvas.width.toFloat()
+                val h = canvas.height.toFloat()
+                container = RotatingOverLineContainer(view.n,w,h)
+                paint.color = Color.parseColor("#3F51B5")
+                paint.strokeWidth = Math.min(w,h)/45
+                paint.strokeCap = Paint.Cap.ROUND
+            }
+            canvas.drawColor(Color.parseColor("#212121"))
+            container?.draw(canvas,paint)
+            time++
+            animator.animate {
+                container?.update {
+                    animator.stop()
+                }
+            }
+        }
+        fun handleTap() {
+            container?.startUpdating {
+                animator.stop()
+            }
+        }
+    }
 }
 fun ConcurrentLinkedQueue<RotatingOverLineView.RotatingOverLine>.at(j:Int):RotatingOverLineView.RotatingOverLine? {
     var i = 0
