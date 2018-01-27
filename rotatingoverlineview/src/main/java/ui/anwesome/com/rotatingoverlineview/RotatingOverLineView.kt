@@ -44,4 +44,19 @@ class RotatingOverLineView(ctx:Context):View(ctx) {
             }
         }
     }
+    data class RotatingOverLine(var i:Int) {
+        fun draw(canvas:Canvas,paint:Paint,x:Float,size:Float) {
+            canvas.save()
+            canvas.translate(x,size*i)
+            canvas.rotate(180f*(1))
+            canvas.drawLine(0f,0f,0f,size,paint)
+            canvas.restore()
+        }
+        fun update(stopcb:(Float)->Unit) {
+
+        }
+        fun startUpdating(startcb:()->Unit) {
+
+        }
+    }
 }
