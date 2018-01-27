@@ -6,7 +6,9 @@ package ui.anwesome.com.rotatingoverlineview
 import android.view.*
 import android.graphics.*
 import android.content.*
-class RotatingOverLineView(ctx:Context):View(ctx) {
+import java.util.concurrent.ConcurrentLinkedQueue
+
+class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     override fun onDraw(canvas:Canvas) {
 
@@ -89,4 +91,45 @@ class RotatingOverLineView(ctx:Context):View(ctx) {
             cb(j)
         }
     }
+    data class RotatingOverLineContainer(var n:Int,var w:Float,var h:Float,var y_gap:Float = 0f) {
+        val lines:ConcurrentLinkedQueue<RotatingOverLine> = ConcurrentLinkedQueue()
+        val state = RotatingOverLineContainerState(n)
+        init {
+            if(n > 0) {
+                for (i in 0..n - 1) {
+                    lines.add(RotatingOverLine(i))
+                }
+                y_gap = h/n
+            }
+        }
+        fun draw(canvas:Canvas,paint:Paint) {
+            state.executeCb { j -> Int
+                for(i in 0..j) {
+                    lines.at(i)?.draw(canvas,paint,w/2,y_gap)
+                }
+                lines.at(j)?.draw(canvas,paint,w/2,y_gap)
+            }
+        }
+        fun update(stopcb:(Float)->Unit) {
+            state.executeCb { j ->
+                lines.at(j)?.update(stopcb)
+                state.incrementCounter()
+            }
+        }
+        fun startUpdating(startcb:()->Unit) {
+            state.executeCb { j ->
+                lines.at(j)?.startUpdating(startcb)
+            }
+        }
+    }
+}
+fun ConcurrentLinkedQueue<RotatingOverLineView.RotatingOverLine>.at(j:Int):RotatingOverLineView.RotatingOverLine? {
+    var i = 0
+    forEach {
+        if(i == j) {
+            return it
+        }
+        i++
+    }
+    return null
 }
