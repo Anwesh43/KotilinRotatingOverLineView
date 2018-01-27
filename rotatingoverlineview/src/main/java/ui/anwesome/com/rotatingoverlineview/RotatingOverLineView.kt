@@ -51,9 +51,13 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
     data class RotatingOverLine(var i:Int) {
         val state = RotatingOverLineState()
         fun draw(canvas:Canvas,paint:Paint,x:Float,size:Float) {
+            var deg = 180f
+            if(i == 0) {
+                deg = 90f
+            }
             canvas.save()
             canvas.translate(x,size*i)
-            canvas.rotate(180f*(1-state.scale))
+            canvas.rotate(deg*(1-state.scale))
             canvas.drawLine(0f,0f,0f,size,paint)
             canvas.restore()
         }
@@ -109,13 +113,15 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
                 for(i in 0..j) {
                     lines.at(i)?.draw(canvas,paint,w/2,y_gap)
                 }
-                lines.at(j)?.draw(canvas,paint,w/2,y_gap)
             }
         }
         fun update(stopcb:(Float)->Unit) {
             state.executeCb { j ->
-                lines.at(j)?.update(stopcb)
-                state.incrementCounter()
+                lines.at(j)?.update {
+                    stopcb(it)
+                    state.incrementCounter()
+                }
+
             }
         }
         fun startUpdating(startcb:()->Unit) {
@@ -147,7 +153,7 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
         }
         fun handleTap() {
             container?.startUpdating {
-                animator.stop()
+                animator.start()
             }
         }
     }
