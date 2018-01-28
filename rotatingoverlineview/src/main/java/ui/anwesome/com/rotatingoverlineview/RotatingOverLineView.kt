@@ -12,6 +12,10 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val renderer = Renderer(this)
+    var rotatingOverListener:RotatingOverLineListener?=null
+    fun addRotatingOverListener( onOpen:(Int)->Unit, onClose:(Int)->Unit) {
+        rotatingOverListener = RotatingOverLineListener(onOpen,onClose)
+    }
     override fun onDraw(canvas:Canvas) {
         renderer.render(canvas,paint)
     }
@@ -132,10 +136,10 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
                 }
             }
         }
-        fun update(stopcb:(Float)->Unit) {
+        fun update(stopcb:(Float,Int)->Unit) {
             state.executeCb { j ->
                 lines.at(j)?.update {
-                    stopcb(it)
+                    stopcb(it,j)
                     state.incrementCounter()
                 }
 
@@ -162,8 +166,12 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
             container?.draw(canvas,paint)
             time++
             animator.animate {
-                container?.update {
+                container?.update {scale,j ->
                     animator.stop()
+                    when(scale) {
+                        0f -> view.rotatingOverListener?.onCloseListener?.invoke(j)
+                        1f -> view.rotatingOverListener?.onOpenListener?.invoke(j)
+                    }
                 }
             }
         }
@@ -180,6 +188,7 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
             return view
         }
     }
+    data class RotatingOverLineListener(var onOpenListener:(Int)->Unit,var onCloseListener:(Int)->Unit)
 }
 fun ConcurrentLinkedQueue<RotatingOverLineView.RotatingOverLine>.at(j:Int):RotatingOverLineView.RotatingOverLine? {
     var i = 0
