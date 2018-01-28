@@ -58,7 +58,9 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
             canvas.save()
             canvas.translate(x,size*i)
             canvas.rotate(deg*(1-state.scale))
-            canvas.drawLine(0f,0f,0f,size,paint)
+            if(i!=0 || state.scale != 0f) {
+                canvas.drawLine(0f, 0f, 0f, size, paint)
+            }
             canvas.restore()
         }
         fun update(stopcb:(Float)->Unit) {
@@ -109,9 +111,24 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
             }
         }
         fun draw(canvas:Canvas,paint:Paint) {
+            paint.color = Color.parseColor("#3F51B5")
             state.executeCb { j -> Int
                 for(i in 0..j) {
                     lines.at(i)?.draw(canvas,paint,w/2,y_gap)
+                }
+            }
+            state.executeCb { j ->
+                if(n > 0) {
+                    val deg = 360/n
+                    val size = Math.min(w, h) / 8
+                    val scale = lines.at(j)?.state?.scale?:0f
+                    paint.color = Color.parseColor("#00838F")
+                    for (i in 0..1) {
+                        canvas.save()
+                        canvas.translate(w / 4 + i * w / 2, h / 2)
+                        canvas.drawArc(RectF(-size, -size, size, size), 0f, deg*j+deg*scale,true,paint)
+                        canvas.restore()
+                    }
                 }
             }
         }
@@ -138,7 +155,6 @@ class RotatingOverLineView(ctx:Context,var n:Int = 10):View(ctx) {
                 val w = canvas.width.toFloat()
                 val h = canvas.height.toFloat()
                 container = RotatingOverLineContainer(view.n,w,h)
-                paint.color = Color.parseColor("#3F51B5")
                 paint.strokeWidth = Math.min(w,h)/45
                 paint.strokeCap = Paint.Cap.ROUND
             }
